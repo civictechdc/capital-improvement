@@ -65,6 +65,7 @@ app = {
       if (target.prop('tagName') !== 'A') { target = target.parents('a'); }
 
       let href = target.attr('href');
+      if (href === '') { return false; }
       if (!href || href.charAt(0) !== '?') { return true; }
 
       app.setState(app.deserializeState(href.substring(1)), { resetAll: true });

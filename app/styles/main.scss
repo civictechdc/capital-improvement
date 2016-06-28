@@ -382,7 +382,10 @@ footer a {
     text-indent: 1em;
     top: .125em;
 
-    &.disabled { color: $lt-gray; }
+    &.disabled {
+      color: $lt-gray;
+      cursor: default;
+    }
 
     &:before {
       position: absolute;
