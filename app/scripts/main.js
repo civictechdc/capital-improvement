@@ -227,7 +227,7 @@ views.IndexView.prototype = {
 
     if (props.q !== this.state.q) {
       this.state.q = props.q;
-      this.$el.find('.search-bar input').val(props.q);
+      this.$el.find('.search-bar input').val(props.q).keyup();
     }
 
     if (props.agency !== this.state.agency) {
