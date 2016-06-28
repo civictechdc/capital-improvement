@@ -76,10 +76,10 @@ app = {
     if (_.includes(changed, 'introVisible')) {
       // TODO: Hide/show introduction
     }
-    if (_.includes(changed, 'indexOptions')) {
+    if (resetAll || resetPage || _.includes(changed, 'indexOptions')) {
       app.views.indexView.update(app.state.indexOptions);
     }
-    if (_.includes(changed, 'detailOptions')) {
+    if (resetAll || _.includes(changed, 'detailOptions')) {
       app.views.detailView.update(app.state.detailOptions);
     }
     if (_.includes(changed, 'view')) {
