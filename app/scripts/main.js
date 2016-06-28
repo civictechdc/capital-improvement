@@ -253,6 +253,7 @@ views.IndexView.prototype = {
 
     if (props.sort) { data = _.sortBy(data, props.sort); }
 
+    // TODO: Sort controls
     // TODO: Pagination controls
 
     data = data.slice(RESULTS_PER_PAGE * props.p, RESULTS_PER_PAGE * (props.p + 1));
