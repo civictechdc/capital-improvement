@@ -213,13 +213,34 @@
         <div class="scroll-container">
 
           <div class="project-cumulative-funding">
-            <h3>Cumulative Funding</h3>
+            <h3 class="pinned">Cumulative Funding</h3>
             <div class="chart"></div>
             <div class="table">
-              <table>
+              <table class="pinned" aria-hidden="true">
                 <thead>
                   <tr>
-                    <th></th>
+                    <th>&nbsp;</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr class="proposed">
+                    <th>Proposed</th>
+                  </tr>
+                  <tr class="allotted">
+                    <th>Allotted</th>
+                  </tr>
+                  <tr class="balance sub">
+                    <th>Balance</th>
+                  </tr>
+                  <tr class="spent sub">
+                    <th>Spent</th>
+                  </tr>
+                </tbody>
+              </table>
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>&nbsp;</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -241,7 +262,7 @@
           </div>
 
           <div class="project-historical-plans">
-            <h3>Historical Plans</h3>
+            <h3 class="pinned">Historical Plans</h3>
             <div class="chart"></div>
           </div>
 

@@ -532,7 +532,7 @@ footer a {
   overflow-x: scroll;
   > * { padding: 15px 0; }
 
-  h3 { position: absolute; }
+  .pinned { position: absolute; }
 }
 
 .project-cumulative-funding {
@@ -545,6 +545,7 @@ footer a {
       &:first-child { width: 120px; }
     }
   }
+  table.pinned { background: $bg; z-index: 100; }
   .table tbody tr {
     th {
       position: relative;

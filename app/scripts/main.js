@@ -374,9 +374,7 @@ views.DetailView.prototype = {
       let yearRange = _.range(data.first_year, maxYear + 1);
       let futureIdx = yearRange.length + CURRENT_YEAR - maxYear;
 
-      let table = view.el.select('.project-cumulative-funding .table table');
-
-      // TODO: Pin row headers
+      let table = view.el.select('.project-cumulative-funding .data-table');
 
       table.select('thead tr')
         .selectAll('th.year')
