@@ -55,7 +55,9 @@ app = {
     let paramStr = window.location.search.substring(1);
     app.setState(app.deserializeState(paramStr), { replace: true });
 
-    // TODO: Handler for popstate event
+    $(window).on('popstate', function (e) {
+      app.setState(e.originalEvent.state, { silent: true });
+    });
 
     $(document).on('click', function (e) {
       let target = $(e.target);
@@ -70,7 +72,12 @@ app = {
     });
   },
 
-  setState: function (state, { replace = false, resetPage = false, resetAll = false }) {
+  setState: function (state, {
+      silent = false,
+      replace = false,
+      resetPage = false,
+      resetAll = false
+    } = {}) {
     let changed = _.keys(state);
     app.state = _.defaultsDeep(state, resetAll ? DEFAULT_STATE : app.state);
 
@@ -88,6 +95,8 @@ app = {
     if (_.includes(changed, 'view')) {
       // TODO: Hide/show views
     }
+
+    if (silent) { return; }
 
     window.history[replace ? 'replaceState' : 'pushState'](
       app.state,
@@ -140,7 +149,7 @@ views.IndexView = function (sel) {
   this.$el.find('#hide-inactive').change(function (e) {
     let showInactive = !$(e.target).prop('checked');
     view.state.showInactive = showInactive;
-    app.setState({ indexOptions: { showInactive } }, { replace: true, resetPage: true });
+    app.setState({ indexOptions: { showInactive } }, { resetPage: true });
   });
 
   this.$el.find('.search-bar input').keyup(_.debounce(function (e) {
@@ -197,7 +206,7 @@ views.IndexView = function (sel) {
     view.$el.find('.filters .agency-filter').change(function (e) {
       let agency = $(e.target).val();
       view.state.agency = agency;
-      app.setState({ indexOptions: { agency } }, { replace: true, resetPage: true });
+      app.setState({ indexOptions: { agency } }, { resetPage: true });
     }).chosen({
       'width': '280px',
       'allow_single_deselect': true
@@ -206,7 +215,7 @@ views.IndexView = function (sel) {
     view.$el.find('.filters .ward-filter').change(function (e) {
       let ward = $(e.target).val();
       view.state.ward = ward;
-      app.setState({ indexOptions: { ward } }, { replace: true, resetPage: true });
+      app.setState({ indexOptions: { ward } }, { resetPage: true });
     }).chosen({
       'width': '140px',
       'allow_single_deselect': true
