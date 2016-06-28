@@ -54,6 +54,8 @@ app = {
     let paramStr = window.location.search.substring(1);
     app.setState(app.deserializeState(paramStr), { replace: true });
 
+    // TODO: Handler for popstate event
+
     $(document).on('click', function (e) {
       let target = $(e.target);
 
