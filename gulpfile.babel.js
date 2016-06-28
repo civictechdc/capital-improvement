@@ -3,7 +3,6 @@ import gulpLoadPlugins from 'gulp-load-plugins';
 import browserSync from 'browser-sync';
 import del from 'del';
 import { stream as wiredep } from 'wiredep';
-import through2 from 'through2';
 import browserify from 'browserify';
 import watchify from 'watchify';
 import babelify from 'babelify';
@@ -116,6 +115,12 @@ gulp.task('images', () => {
     .pipe(gulp.dest('dist/images'));
 });
 
+gulp.task('fonts', () => {
+  return gulp.src('app/fonts/**/*')
+    .pipe(gulp.dest('.tmp/fonts'))
+    .pipe(gulp.dest('dist/fonts'));
+});
+
 gulp.task('data', () => {
   return gulp.src('app/data/**/*')
     .pipe(gulp.dest('.tmp/data'))
@@ -133,7 +138,7 @@ gulp.task('extras', () => {
 
 gulp.task('clean', del.bind(null, ['.tmp', 'dist']));
 
-gulp.task('serve', ['styles','watchify', 'data'], () => {
+gulp.task('serve', ['styles','watchify','fonts','data'], () => {
   browserSync({
     notify: false,
     port: 9000,
@@ -148,10 +153,12 @@ gulp.task('serve', ['styles','watchify', 'data'], () => {
   gulp.watch([
     'app/*.html',
     'app/images/**/*',
+    '.tmp/fonts/**/*',
     '.tmp/data/**/*'
   ]).on('change', reload);
 
   gulp.watch(['app/styles/**/*.scss', '/bower_components'], ['styles']);
+  gulp.watch('app/fonts/**/*', ['fonts']);
   gulp.watch('app/data/**/*', ['data']);
   gulp.watch('bower.json', ['wiredep']);
 });
@@ -187,7 +194,7 @@ gulp.task('deploy', ['build'], function() {
 });
 
 
-gulp.task('build', ['scripts', 'html', 'images', 'data', 'extras'], () => {
+gulp.task('build', ['scripts', 'html', 'images', 'fonts', 'data', 'extras'], () => {
   return gulp.src('dist/**/*').pipe($.size({
     title: 'build',
     gzip: true
