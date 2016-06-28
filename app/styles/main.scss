@@ -528,6 +528,52 @@ footer a {
   @extend .mobile-col-1;
 }
 
+.scroll-container {
+  overflow-x: scroll;
+  > * { padding: 15px 0; }
+
+  h3 { position: absolute; }
+}
+
+.project-cumulative-funding {
+  table {
+    width: 0;
+    max-width: none;
+    table-layout: fixed;
+    thead th {
+      width: 100px;
+      &:first-child { width: 120px; }
+    }
+  }
+  .table tbody tr {
+    th {
+      position: relative;
+      padding-left: 1.5em;
+
+      &:before {
+        content: "";
+        position: absolute;
+        display: block;
+        left: 0; top: .23em;
+        width: 1em; height: 1em;
+      }
+    }
+
+    &.proposed th:before { background: $red; }
+    &.balance th:before { background: $lt-blue; }
+    &.spent th:before { background: $blue; }
+
+    &.sub th {
+      font-weight: 400;
+      padding-left: 3em;
+      &:before { left: 1.5em; }
+    }
+  }
+  svg .proposed { fill: $red; }
+  svg .balance { fill: $lt-blue; }
+  svg .spent { fill: $blue; }
+}
+
 .browserupgrade {
   text-align: center;
   margin: 1em 15px;

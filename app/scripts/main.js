@@ -1,6 +1,7 @@
 /* global $ */
 
 // TODO: Skip to main link
+// TODO: Breakpoints for indexView table
 
 const d3 = require('d3');
 const _ = require('lodash');
@@ -12,7 +13,12 @@ const SUMMARY_PATH = 'data/summary.json';
 const DETAIL_PATH_FOR_ID = (id) => `data/projects/${id}.json`;
 
 const TITLE = 'DC Capital Improvement Tracker';
+const CURRENT_YEAR = 2017;
 const RESULTS_PER_PAGE = 20;
+const CHART_LEFT_MARGIN = 135;
+const YEAR_WIDTH = 100;
+const CUM_FUNDING_HEIGHT = 120;
+const CUM_FUNDING_BAR_WIDTH = 45;
 
 const DEFAULT_STATE = {
   title: TITLE,
@@ -48,9 +54,6 @@ app = {
       indexView: new views.IndexView('#index-view'),
       detailView: new views.DetailView('#detail-view')
     };
-
-    $(window).on('resize', _.debounce(app.views.detailView.resize, 150));
-    // TODO: Breakpoints for indexView table
 
     let paramStr = window.location.search.substring(1);
     app.setState(app.deserializeState(paramStr), { replace: true });
@@ -360,14 +363,93 @@ views.DetailView.prototype = {
 
       view.el.html(view.template(data));
 
+      let totalFunding = data.cumulative_funding.total_funding;
+      let maxYear = parseInt(_(data.cip_history)
+        .values()
+        .map((v) => _.toPairs(v))
+        .flatten()
+        .filter(1)
+        .maxBy(0)[0]
+        .substring(2), 10);
+      let yearRange = _.range(data.first_year, maxYear + 1);
+      let futureIdx = yearRange.length + CURRENT_YEAR - maxYear;
+
+      let table = view.el.select('.project-cumulative-funding .table table');
+
+      // TODO: Pin row headers
+
+      table.select('thead tr')
+        .selectAll('th.year')
+        .data(yearRange)
+        .enter().append('th')
+        .attr('class', 'year')
+        .text((d) => 'FY' + d);
+
+      table.select('tr.proposed')
+        .selectAll('td')
+        .data(_.map(yearRange, (year) => _.get(totalFunding, ['FY' + year, 'proposed'])))
+        .enter().append('td')
+        .html((d) => d ? DOLLAR_FORMAT(d) : '&ndash;');
+
+      table.select('tr.allotted')
+        .selectAll('td')
+        .data(_.map(yearRange, (year) => _.get(totalFunding, ['FY' + year, 'allotted'])))
+        .enter().append('td')
+        .html((d) => d ? DOLLAR_FORMAT(d) : '&ndash;');
+
+      table.select('tr.balance')
+        .selectAll('td')
+        .data(_.map(yearRange, (year) => _.get(totalFunding, ['FY' + year, 'allotted']) - _.get(totalFunding, ['FY' + year, 'spent'])))
+        .enter().append('td')
+        .html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d) : '&ndash;');
+
+      table.select('tr.spent')
+        .selectAll('td')
+        .data(_.map(yearRange, (year) => _.get(totalFunding, ['FY' + year, 'spent'])))
+        .enter().append('td')
+        .html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d) : '&ndash;');
+
+      let cumFundingData = _(totalFunding)
+        .map((v, k) => _.assign({ year: k }, v))
+        .forEach((d) => {
+          d.segments = [
+            { name: 'spent', y0: 0, y1: d.spent },
+            { name: 'balance', y0: d.spent, y1: d.allotted },
+            { name: 'proposed', y0: d.allotted, y1: d.allotted + d.proposed }
+          ];
+          d.total = d.segments[d.segments.length - 1].y1;
+        });
+
+      let cumFundingX = d3.scale.ordinal()
+        .domain(_.map(yearRange, (d) => 'FY' + d))
+        .rangeRoundPoints([CHART_LEFT_MARGIN, CHART_LEFT_MARGIN + (yearRange.length - 1) * YEAR_WIDTH]);
+
+      let cumFundingY = d3.scale.linear()
+        .domain([0, d3.max(cumFundingData, (d) => d.total)])
+        .range([CUM_FUNDING_HEIGHT, 0]);
+
+      view.el.select('.project-cumulative-funding .chart')
+        .append('svg')
+        .attr('width', YEAR_WIDTH * yearRange.length + CHART_LEFT_MARGIN)
+        .attr('height', CUM_FUNDING_HEIGHT)
+        .selectAll('g.bar')
+        .data(cumFundingData)
+        .enter().append('g')
+        .attr('class', 'bar')
+        .attr('transform', (d) => `translate(${cumFundingX(d.year)},0)`)
+        .selectAll('rect')
+        .data((d) => d.segments)
+        .enter().append('rect')
+        .attr('class', (d) => d.name)
+        .attr('x', 0)
+        .attr('y', (d) => cumFundingY(d.y1))
+        .attr('width', CUM_FUNDING_BAR_WIDTH)
+        .attr('height', (d) => cumFundingY(d.y0) - cumFundingY(d.y1));
+
+
       // TODO: Description read more button
       // TODO: Map
-      // TODO: Cumulative Funding chart
       // TODO: Historical Plans chart
     });
-  },
-
-  resize: function () {
-    //
   }
 };
