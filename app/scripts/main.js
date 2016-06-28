@@ -374,38 +374,38 @@ views.DetailView.prototype = {
       let yearRange = _.range(data.first_year, maxYear + 1);
       let futureIdx = yearRange.length + CURRENT_YEAR - maxYear;
 
-      let table = view.el.select('.project-cumulative-funding .data-table');
+      let cumFundingTable = view.el.select('.project-cumulative-funding .data-table');
 
-      table.select('thead tr')
+      cumFundingTable.select('thead tr')
         .selectAll('th.year')
         .data(yearRange)
         .enter().append('th')
         .attr('class', 'year')
         .text((d) => 'FY' + d);
 
-      table.select('tr.proposed')
+      cumFundingTable.select('tr.proposed')
         .selectAll('td')
         .data(_.map(yearRange, (year) => _.get(totalFunding, ['FY' + year, 'proposed'])))
         .enter().append('td')
-        .html((d) => d ? DOLLAR_FORMAT(d) : '&ndash;');
+        .html((d) => d ? DOLLAR_FORMAT(d * 1000) : '&ndash;');
 
-      table.select('tr.allotted')
+      cumFundingTable.select('tr.allotted')
         .selectAll('td')
         .data(_.map(yearRange, (year) => _.get(totalFunding, ['FY' + year, 'allotted'])))
         .enter().append('td')
-        .html((d) => d ? DOLLAR_FORMAT(d) : '&ndash;');
+        .html((d) => d ? DOLLAR_FORMAT(d * 1000) : '&ndash;');
 
-      table.select('tr.balance')
+      cumFundingTable.select('tr.balance')
         .selectAll('td')
         .data(_.map(yearRange, (year) => _.get(totalFunding, ['FY' + year, 'allotted']) - _.get(totalFunding, ['FY' + year, 'spent'])))
         .enter().append('td')
-        .html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d) : '&ndash;');
+        .html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d * 1000) : '&ndash;');
 
-      table.select('tr.spent')
+      cumFundingTable.select('tr.spent')
         .selectAll('td')
         .data(_.map(yearRange, (year) => _.get(totalFunding, ['FY' + year, 'spent'])))
         .enter().append('td')
-        .html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d) : '&ndash;');
+        .html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d * 1000) : '&ndash;');
 
       let cumFundingData = _(totalFunding)
         .map((v, k) => _.assign({ year: k }, v))
@@ -443,6 +443,31 @@ views.DetailView.prototype = {
         .attr('y', (d) => cumFundingY(d.y1))
         .attr('width', CUM_FUNDING_BAR_WIDTH)
         .attr('height', (d) => cumFundingY(d.y0) - cumFundingY(d.y1));
+
+      let histTable = view.el.select('.project-historical-plans .data-table');
+      let histData = _(data.cip_history).map((plan, planYear) =>
+        ({ planYear, plan: _.map(yearRange, (year) => ({ year, proposed: plan['FY' + year] })) })
+      ).sortBy('planYear').value();
+
+      view.el.selectAll('.project-historical-plans tbody')
+        .selectAll('tr')
+        .data(histData)
+        .enter().append('tr')
+        .append('th')
+        .text((d) => d.planYear + ' Plan');
+
+      histTable.select('thead tr')
+        .selectAll('th.year')
+        .data(yearRange)
+        .enter().append('th')
+        .attr('class', 'year')
+        .text((d) => 'FY' + d);
+
+      histTable.selectAll('tbody tr')
+        .selectAll('td')
+        .data((d) => d.plan)
+        .enter().append('td')
+        .text((d) => _.isUndefined(d.proposed) ? '' : DOLLAR_FORMAT(d.proposed * 1000));
 
 
       // TODO: Description read more button

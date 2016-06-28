@@ -575,6 +575,22 @@ footer a {
   svg .spent { fill: $blue; }
 }
 
+.project-historical-plans {
+  .table { margin-top: 2em; }
+  table {
+    width: 0;
+    max-width: none;
+    table-layout: fixed;
+    thead th {
+      width: 100px;
+      &:first-child { width: 120px; }
+    }
+    &.pinned { background: $bg; z-index: 100; }
+  }
+
+  tbody { line-height: 100px; }
+}
+
 .browserupgrade {
   text-align: center;
   margin: 1em 15px;
