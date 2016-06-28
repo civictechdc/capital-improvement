@@ -4,6 +4,7 @@
 
 const d3 = require('d3');
 const _ = require('lodash');
+const Fuse = require('fuse.js');
 
 // TODO: Import specific modules from D3 (requires v4) and Lodash
 
@@ -152,7 +153,7 @@ views.IndexView = function (sel) {
     }
     view.state.q = q;
     app.setState({ indexOptions: { q } }, { replace: true, resetPage: true });
-  }, 100));
+  }, 200));
 
   this.$el.find('.search-bar .clear-search').click(function (e) {
     $(e.target).siblings('.search-bar input').val('').keyup();
@@ -171,6 +172,12 @@ views.IndexView = function (sel) {
           .sortBy(([k, v]) => k)
           .last()[1].spent * 1000 / d.est_cost
           || 0 : 1;
+    });
+
+    view.fuse = new Fuse(data, {
+      keys: ['title', 'agency'],
+      tokenize: true,
+      threshold: 0.5
     });
 
     let agencies = _(view.data)
@@ -236,13 +243,13 @@ views.IndexView.prototype = {
       this.$el.find('#hide-inactive').prop('checked', !props.showInactive);
     }
 
-    let data = this.data.filter((d) =>
+    let data = props.q ? this.fuse.search(props.q) : this.data;
+
+    data = data.filter((d) =>
       (props.showInactive ? true : d.active) &&
       (props.ward ? d.ward === props.ward : true) &&
       (props.agency ? d.agency === props.agency : true)
     );
-
-    // TODO: Search
 
     if (props.sort) { data = _.sortBy(data, props.sort); }
 
