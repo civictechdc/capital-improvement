@@ -218,6 +218,8 @@ views.IndexView = function (sel) {
 
 views.IndexView.prototype = {
   update: function (props) {
+    var view = this;
+
     if (!this.data) {
       this.pendingUpdate = () => this.update(props);
       return;
@@ -254,9 +256,31 @@ views.IndexView.prototype = {
     if (props.sort) { data = _.sortBy(data, props.sort); }
 
     // TODO: Sort controls
-    // TODO: Pagination controls
 
-    data = data.slice(RESULTS_PER_PAGE * props.p, RESULTS_PER_PAGE * (props.p + 1));
+    let page = parseInt(props.p, 10);
+    let lastPage = Math.ceil(data.length / RESULTS_PER_PAGE) - 1;
+    if (page > lastPage) { props.p = '0'; page = 0; }
+
+    let hrefForPage = (p) => '?' + app.serializeState({
+      view: 'index',
+      indexOptions: _.defaults({ p }, props)
+    });
+
+    _.forEach({
+      first: page > 0 ? hrefForPage(0) : '',
+      prev: page > 0 ? hrefForPage(page - 1) : '',
+      next: page < lastPage ? hrefForPage(page + 1) : '',
+      last: page < lastPage ? hrefForPage(lastPage) : ''
+    }, function (href, button) {
+      view.el.selectAll(`.${button}-page`)
+        .attr('href', href)
+        .classed('disabled', href === '')
+        .attr('aria-disabled', href === '');
+    });
+
+    this.el.selectAll('.current-page').text(page + 1);
+
+    data = data.slice(RESULTS_PER_PAGE * page, RESULTS_PER_PAGE * (page + 1));
 
     this.tbody.html('');
 
@@ -278,6 +302,10 @@ views.IndexView.prototype = {
       .text((d) => d.agency);
 
     rows.append('td')
+      .attr('class', (d) => 'last-year' + (d.active ? '' : ' inactive'))
+      .text((d) => 'FY' + d.last_year);
+
+    rows.append('td')
       .attr('class', 'cost')
       .text((d) => DOLLAR_FORMAT(d.est_cost));
 
@@ -297,10 +325,6 @@ views.IndexView.prototype = {
           .attr('class', 'bar')
           .style('width', percent);
       });
-
-    rows.append('td')
-      .attr('class', (d) => 'completion' + (d.active ? '' : ' inactive'))
-      .text((d) => 'FY' + d.last_year);
   }
 };
 

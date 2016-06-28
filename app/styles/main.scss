@@ -107,6 +107,14 @@ label {
   margin: -1px; padding: 0; border: 0;
 }
 
+.clearfix {
+  &:after {
+    content: "";
+    display: table;
+    clear: both;
+  }
+}
+
 section { margin: 1em 0; }
 
 .container {
@@ -114,11 +122,7 @@ section { margin: 1em 0; }
   margin: 0 auto;
   padding: 0 15px;
 
-  &:after {
-    content: "";
-    display: table;
-    clear: both;
-  }
+  @extend .clearfix;
 }
 
 .row {
@@ -129,11 +133,7 @@ section { margin: 1em 0; }
     &:last-child { float: right; }
   }
 
-  &:after {
-    content: "";
-    display: table;
-    clear: both;
-  }
+  @extend .clearfix;
 }
 
 .mobile-col-1 {
@@ -216,6 +216,8 @@ footer a {
 
   .controls {
     > * { float: left; }
+
+    @extend .clearfix;
   }
 
   .filters > * {
@@ -340,7 +342,7 @@ footer a {
     }
   }
 
-  td.completion {
+  td.last-year {
     color: $green;
     &.inactive { color: $red; }
   }
@@ -355,7 +357,7 @@ footer a {
       background: $blue;
       border-color: $blue;
       color: $white;
-      td.completion { color: $white; }
+      td.last-year { color: $white; }
       td.percent .bar-wrapper { border-color: $white; }
     }
   }
@@ -363,6 +365,61 @@ footer a {
     line-height: 1em;
     padding: 10px 15px;
   }
+}
+
+.page-controls {
+  text-align: right;
+
+  a {
+    display: inline-block;
+    position: relative;
+    overflow: hidden;
+    width: 1em;
+    height: 1em;
+    line-height: 1em;
+    text-indent: 1em;
+    top: .125em;
+
+    &.disabled { color: $lt-gray; }
+
+    &:before {
+      position: absolute;
+      top: 0; left: -1em; right: 0;
+      text-align: center;
+      font-family: 'FontAwesome';
+    }
+
+    &.first-page:before { content: $fa-var-fast-backward; }
+    &.prev-page:before { content: $fa-var-backward; }
+    &.next-page:before { content: $fa-var-forward; }
+    &.last-page:before { content: $fa-var-fast-forward; }
+  }
+
+  span.current-page {
+    display: inline-block;
+    font-size: 1rem;
+    padding: 0 .5em;
+  }
+}
+
+.page-prev-next {
+  a {
+    display: inline-block;
+    text-align: center;
+    border-radius: 100px;
+    padding: .2em 2em;
+    margin: 1em 0;
+    background: $link;
+    color: $bg;
+    font-weight: 700;
+
+    &.disabled { display: none; }
+
+    &.prev-page { float: left; }
+    &.next-page { float: right; }
+  }
+
+  @extend .clearfix;
 }
 
 #detail-view {
