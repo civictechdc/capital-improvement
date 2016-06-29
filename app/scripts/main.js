@@ -447,7 +447,7 @@ views.DetailView.prototype = {
       let histTable = view.el.select('.project-historical-plans .data-table');
       let histData = _(data.cip_history).map((plan, planYear) =>
         ({ planYear, plan: _.map(yearRange, (year) => ({ year, proposed: plan['FY' + year] })) })
-      ).sortBy('planYear').value();
+      ).sortBy('planYear').reverse().value();
 
       view.el.selectAll('.project-historical-plans tbody')
         .selectAll('tr')
