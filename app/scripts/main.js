@@ -469,10 +469,55 @@ views.DetailView.prototype = {
         .enter().append('td')
         .text((d) => _.isUndefined(d.proposed) ? '' : DOLLAR_FORMAT(d.proposed * 1000));
 
+      let filteredHistData = _.map(histData, (d) => ({
+        planYear: d.planYear,
+        plan: _.filter(d.plan, (e) => !_.isUndefined(e.proposed))
+      }));
+
+      let histChartX = d3.scale.ordinal()
+        .domain(yearRange)
+        .rangeRoundPoints([0, YEAR_WIDTH * (yearRange.length - 1)]);
+
+      let rScale = d3.scale.sqrt()
+        .domain([0, _(filteredHistData).flatMap('plan').map('proposed').max()])
+        .range([0, YEAR_WIDTH / 2]);
+
+      let plans = view.el.select('.project-historical-plans .chart')
+        .append('svg')
+        .attr('width', YEAR_WIDTH * yearRange.length)
+        .attr('height', YEAR_WIDTH * histData.length)
+        .selectAll('g.plan')
+        .data(filteredHistData)
+        .enter().append('g')
+        .attr('class', 'plan')
+        .attr('transform', (d, i) => `translate(${CUM_FUNDING_BAR_WIDTH / 2},${(i + .5) * YEAR_WIDTH})`);
+
+      plans.append('line')
+        .attr('x1', (d) => histChartX(d3.min(d.plan, (e) => e.year)))
+        .attr('y1', 0)
+        .attr('x2', (d) => histChartX(d3.max(d.plan, (e) => e.year)))
+        .attr('y2', 0);
+
+      let years = plans.selectAll('g.year')
+        .data((d) => d.plan)
+        .enter().append('g')
+        .attr('class', 'year')
+        .attr('transform', (d) => `translate(${histChartX(d.year)},0)`);
+
+      years.append('line')
+        .attr('x1', 0)
+        .attr('y1', -6)
+        .attr('x2', 0)
+        .attr('y2', 6);
+
+      years.append('circle')
+        .attr('cx', 0)
+        .attr('cy', 0)
+        .attr('r', (d) => rScale(d.proposed));
+
 
       // TODO: Description read more button
       // TODO: Map
-      // TODO: Historical Plans chart
     });
   }
 };
