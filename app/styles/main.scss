@@ -455,17 +455,32 @@ footer a {
       left: 0;
     }
   }
+
+  .attribution {
+    display: block;
+    position: absolute;
+    background: rgba(255,255,255,.5);
+    padding: .27em;
+    line-height: 1em;
+    bottom: 0;
+    right: 0;
+    font-size: .6875rem;
+  }
 }
 
 .project-summary {
-    width: 50%;
-    @extend .mobile-col-1;
-    position: relative;
-    @media screen and (min-width: 768px) { right: 30%; }
+  width: 80%;
+  @extend .mobile-col-1;
+  position: relative;
 
-    > div.card {
-        min-height: 264px;
-    }
+  table { width: inherit; }
+}
+
+.project-map + .project-summary {
+  width: 50%;
+  @media screen and (min-width: 768px) { right: 30%; }
+
+  > div.card { min-height: 264px; }
 }
 
 .project-status {

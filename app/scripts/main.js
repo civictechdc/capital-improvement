@@ -533,7 +533,6 @@ views.DetailView.prototype = {
 
 
       // TODO: Description read more button
-      // TODO: Map
       // TODO: Filter cumulative funding by source/phase
       // TODO: Toggle historical plans chart into table
       // TODO: Add estimated cost to historical plans row headers

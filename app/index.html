@@ -148,13 +148,16 @@
             </div>
           </div>
 
-          <div class="project-map">
-            <div class="card img-card">
-              <div class="map">
-                <div class="placeholder">Map goes here</div>
+          <% if (d.lat && d.lon) { %>
+            <div class="project-map">
+              <div class="card img-card">
+                <div class="map">
+                  <img src="https://api.mapbox.com/v4/mapbox.streets/pin-m+d25247(<%= d.lon %>,<%= d.lat %>)/<%= d.lon %>,<%= d.lat %>,14/330x265@2x.png?access_token=pk.eyJ1IjoiY21naXZlbiIsImEiOiJjaXEzdjJlaTUwMWg3Zmxub25mc3d6Y3lxIn0.GwleA4huw--Iyf6R6aZpaQ" alt="">
+                  <span class="attribution">&copy; <a href='https://www.mapbox.com/map-feedback/'>Mapbox</a> and <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap contributors</a></span>
+                </div>
               </div>
             </div>
-          </div>
+          <% } %>
 
           <div class="project-summary">
             <div class="card">
