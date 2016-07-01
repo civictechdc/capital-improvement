@@ -474,6 +474,7 @@ footer a {
   position: relative;
 
   table { width: inherit; }
+  th { white-space: nowrap; }
 }
 
 .project-map + .project-summary {
