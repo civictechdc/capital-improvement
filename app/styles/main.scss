@@ -590,6 +590,16 @@ footer a {
 
   tbody { line-height: 100px; }
 
+  .chart {
+    width: 0;
+    height: 0;
+    position: relative;
+    left: 120px;
+    top: 22px;
+  }
+
+  rect.bg { fill: $bg; }
+
   .plan {
     line {
       stroke: $white;
@@ -599,6 +609,12 @@ footer a {
     circle {
       fill: $red;
       opacity: 0.8;
+    }
+
+    text {
+      font-size: 13px;
+      fill: $bodytext;
+      text-transform: lowercase;
     }
   }
 }

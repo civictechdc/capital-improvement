@@ -19,6 +19,7 @@ const CHART_LEFT_MARGIN = 135;
 const YEAR_WIDTH = 100;
 const CUM_FUNDING_HEIGHT = 120;
 const CUM_FUNDING_BAR_WIDTH = 45;
+const HIST_CHART_INDENT = 38;
 
 const DEFAULT_STATE = {
   title: TITLE,
@@ -38,6 +39,7 @@ const DEFAULT_STATE = {
 };
 
 const DOLLAR_FORMAT = d3.format('$,');
+const SHORT_DOLLAR_FORMAT = d3.format('$.2s');
 const PERCENT_FORMAT = d3.format('%');
 
 let app;
@@ -482,15 +484,21 @@ views.DetailView.prototype = {
         .domain([0, _(filteredHistData).flatMap('plan').map('proposed').max()])
         .range([0, YEAR_WIDTH / 2]);
 
-      let plans = view.el.select('.project-historical-plans .chart')
+      let svg = view.el.select('.project-historical-plans .chart')
         .append('svg')
         .attr('width', YEAR_WIDTH * yearRange.length)
-        .attr('height', YEAR_WIDTH * histData.length)
-        .selectAll('g.plan')
+        .attr('height', YEAR_WIDTH * histData.length);
+
+      svg.append('rect')
+        .attr('class', 'bg')
+        .attr('width', YEAR_WIDTH * yearRange.length)
+        .attr('height', YEAR_WIDTH * histData.length);
+
+      let plans = svg.selectAll('g.plan')
         .data(filteredHistData)
         .enter().append('g')
         .attr('class', 'plan')
-        .attr('transform', (d, i) => `translate(${CUM_FUNDING_BAR_WIDTH / 2},${(i + .5) * YEAR_WIDTH})`);
+        .attr('transform', (d, i) => `translate(${HIST_CHART_INDENT},${(i + .5) * YEAR_WIDTH})`);
 
       plans.append('line')
         .attr('x1', (d) => histChartX(d3.min(d.plan, (e) => e.year)))
@@ -515,9 +523,20 @@ views.DetailView.prototype = {
         .attr('cy', 0)
         .attr('r', (d) => rScale(d.proposed));
 
+      years.append('text')
+        .attr('text-anchor', 'middle')
+        .attr('y', (d) => {
+          let r = rScale(d.proposed);
+          return r > 22 ? 5 : Math.max(r + 16, 22);
+        })
+        .text((d) => d.proposed ? SHORT_DOLLAR_FORMAT(d.proposed * 1000) : '$0');
+
 
       // TODO: Description read more button
       // TODO: Map
+      // TODO: Filter cumulative funding by source/phase
+      // TODO: Toggle historical plans chart into table
+      // TODO: Add estimated cost to historical plans row headers
     });
   }
 };
