@@ -345,9 +345,14 @@ views.IndexView.prototype = {
 
 views.DetailView = function (sel) {
   this.el = d3.select(sel);
+  this.$el = $(sel);
   this.template = _.template($('#detail-view-template').html(), {
     variable: 'd',
     imports: { DOLLAR_FORMAT }
+  });
+
+  this.$el.on('click', '.project-description .toggle-collapsed', function (e) {
+    $(e.target).parents('.project-description').toggleClass('collapsed');
   });
 };
 
@@ -531,8 +536,6 @@ views.DetailView.prototype = {
         })
         .text((d) => d.proposed ? SHORT_DOLLAR_FORMAT(d.proposed * 1000) : '$0');
 
-
-      // TODO: Description read more button
       // TODO: Filter cumulative funding by source/phase
       // TODO: Toggle historical plans chart into table
       // TODO: Add estimated cost to historical plans row headers
