@@ -69,6 +69,10 @@ app = {
       if (target.prop('tagName') !== 'A') { target = target.parents('a'); }
 
       let href = target.attr('href');
+      if (href === '#back') {
+        window.history.back();
+        return false;
+      }
       if (href === '') { return false; }
       if (!href || href.charAt(0) !== '?') { return true; }
 
@@ -102,8 +106,10 @@ app = {
 
     if (app.state.introVisible) {
       $('#introduction').slideDown();
+      $('.button-back').addClass('hidden');
     } else {
       $('#introduction').slideUp();
+      $('.button-back').removeClass('hidden');
     }
 
     if (app.state.view === 'index') {
@@ -407,8 +413,6 @@ views.DetailView = function (sel) {
     }
   });
 };
-
-// TODO: Back button
 
 views.DetailView.prototype = {
   show: function () {
