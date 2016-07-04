@@ -1,0 +1,41 @@
+{
+  "name": "Capital Improvement Tracker",
+  "status": "Beta",
+  "type": "Website",
+  "contact": {
+    "name": "Chris Given",
+    "email": "cmgiven@gmail.com"
+  },
+  "partners": [
+    {
+      "url": "http://codefordc.org",
+      "name": "Code for DC"
+    }
+  ],
+  "description": "An interactive data explorer for DC capital improvement plans",
+  "license": "CC0-1.0",
+  "homepage": "http://codefordc.org/capital-improvement",
+  "repository": "https://github.com/codefordc/capital-improvement",
+  "geography": [
+    "District of Columbia"
+  ],
+  "data": [
+    {
+      "name": "DC capital improvement plans",
+      "url": "https://raw.githubusercontent.com/codefordc/capital-improvement/master/app/data/data.json"
+    }
+  ],
+  "tags": [
+    "Data visualization",
+    "Capital investment",
+    "Buildings",
+    "Roads",
+    "Schools",
+    "Libraries",
+    "Rec Centers",
+    "Parks",
+    "Homeless Shelters"
+  ],
+  "links": [],
+  "id": "https://raw.githubusercontent.com/DCgov/civic.json/master/schemas/schema-v1.json"
+}

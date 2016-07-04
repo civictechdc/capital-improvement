@@ -677,4 +677,3 @@ views.DetailView.prototype = {
 
 // TODO: Google Analytics
 // TODO: Footer
-// TODO: README, license, civic.json, and GitHub description
