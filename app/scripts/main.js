@@ -1,6 +1,5 @@
 /* global $ */
 
-// TODO: Skip to main link
 // TODO: Breakpoints for indexView table
 
 const d3 = require('d3');
@@ -21,7 +20,11 @@ const CUM_FUNDING_HEIGHT = 120;
 const CUM_FUNDING_BAR_WIDTH = 45;
 const HIST_CHART_INDENT = 38;
 
-const DEFAULT_STATE = {
+const DOLLAR_FORMAT = d3.format('$,');
+const SHORT_DOLLAR_FORMAT = d3.format('$.2s');
+const PERCENT_FORMAT = d3.format('%');
+
+let defaultState = {
   title: TITLE,
   introVisible: true,
   view: 'index',
@@ -38,17 +41,13 @@ const DEFAULT_STATE = {
   }
 };
 
-const DOLLAR_FORMAT = d3.format('$,');
-const SHORT_DOLLAR_FORMAT = d3.format('$.2s');
-const PERCENT_FORMAT = d3.format('%');
-
 let app;
 let views = {};
 
 $(() => app.initialize());
 
 app = {
-  state: DEFAULT_STATE,
+  state: defaultState,
   views: {},
 
   initialize: function () {
@@ -73,7 +72,13 @@ app = {
       if (href === '') { return false; }
       if (!href || href.charAt(0) !== '?') { return true; }
 
-      app.setState(app.deserializeState(href.substring(1)), { resetAll: true });
+      if (href === '?') {
+        defaultState.introVisible = true;
+        app.setState(defaultState, { resetAll: true });
+      } else {
+        app.setState(app.deserializeState(href.substring(1)), { resetAll: true });
+      }
+
       return false;
     });
   },
@@ -84,22 +89,36 @@ app = {
       resetPage = false,
       resetAll = false
     } = {}) {
+
     let changed = _.keys(state);
-    app.state = _.defaultsDeep(state, resetAll ? DEFAULT_STATE : app.state);
+    app.state = _.defaultsDeep(state, resetAll ? defaultState : app.state);
+
+    if (resetAll && state.view === 'detail') {
+      defaultState.introVisible = false;
+      app.state.introVisible = false;
+    }
 
     if (resetPage) { app.state.indexOptions.p = 0; }
 
-    if (_.includes(changed, 'introVisible')) {
-      // TODO: Hide/show introduction
+    if (app.state.introVisible) {
+      $('#introduction').slideDown();
+    } else {
+      $('#introduction').slideUp();
     }
+
+    if (app.state.view === 'index') {
+      app.views.indexView.show();
+      app.views.detailView.hide();
+    } else {
+      app.views.detailView.show();
+      app.views.indexView.hide();
+    }
+
     if (resetAll || resetPage || _.includes(changed, 'indexOptions')) {
       app.views.indexView.update(app.state.indexOptions);
     }
     if (resetAll || _.includes(changed, 'detailOptions')) {
       app.views.detailView.update(app.state.detailOptions);
-    }
-    if (_.includes(changed, 'view')) {
-      // TODO: Hide/show views
     }
 
     if (silent) { return; }
@@ -130,7 +149,7 @@ app = {
   },
 
   deserializeState: function (str) {
-    if (!str) { return DEFAULT_STATE; }
+    if (!str) { return defaultState; }
 
     let [detailOptions, indexOptions] = _(str.split('&'))
       .map((p) => p.split('='))
@@ -167,7 +186,11 @@ views.IndexView = function (sel) {
       target.parent().removeClass('text-entered');
     }
     view.state.q = q;
-    app.setState({ indexOptions: { q } }, { replace: true, resetPage: true });
+    if (view.active) {
+      app.setState({ indexOptions: { q } }, { replace: true, resetPage: true });
+    } else {
+      app.setState({ view: 'index', indexOptions: { q } }, { resetAll: true });
+    }
   }, 200));
 
   this.$el.find('.search-bar .clear-search').click(function (e) {
@@ -232,6 +255,16 @@ views.IndexView = function (sel) {
 };
 
 views.IndexView.prototype = {
+  show: function () {
+    this.$el.addClass('active');
+    this.active = true;
+  },
+
+  hide: function () {
+    this.$el.removeClass('active');
+    this.active = false;
+  },
+
   update: function (props) {
     var view = this;
 
@@ -242,7 +275,13 @@ views.IndexView.prototype = {
 
     if (props.q !== this.state.q) {
       this.state.q = props.q;
-      this.$el.find('.search-bar input').val(props.q).keyup();
+      let searchBar = this.$el.find('.search-bar');
+      searchBar.children('input').val(props.q);
+      if (props.q !== '') {
+        searchBar.addClass('text-entered');
+      } else {
+        searchBar.removeClass('text-entered');
+      }
     }
 
     if (props.agency !== this.state.agency) {
@@ -357,6 +396,14 @@ views.DetailView = function (sel) {
 };
 
 views.DetailView.prototype = {
+  show: function () {
+    this.$el.addClass('active');
+  },
+
+  hide: function () {
+    this.$el.removeClass('active');
+  },
+
   update: function ({ id }) {
     let view = this;
 

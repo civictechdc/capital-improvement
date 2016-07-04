@@ -21,6 +21,8 @@ $link      : $blue;
     margin: 0;
 }
 
+html, body { height: 100%; }
+
 body {
   background: $bodytext;
   color: $white;
@@ -34,6 +36,7 @@ main {
   color: $bodytext;
   padding: 15px;
   padding-bottom: 3rem;
+  min-height: 100%;
 }
 
 input { font-family: 'Roboto', 'Helvetica Neue', Arial, sans-serif; }
@@ -201,6 +204,7 @@ footer a {
 }
 
 #introduction {
+  margin: 0;
   p {
     font-size: 1.125rem;
   }
@@ -231,6 +235,17 @@ footer a {
     margin-bottom: .5rem;
   }
 
+  .filters { opacity: 0; transition: opacity 350ms; }
+  &.active .filters { opacity: 1; }
+
+  .results { display: none; }
+  &.active .results {
+    display: block;
+    opacity: 1;
+    transform: scale(1);
+    animation: pop 350ms ease-in-out;
+  }
+
   &.active .search-bar input, .search-bar.text-entered input, .search-bar input:focus {
     width: 17rem;
     padding-right: 2.06rem;
@@ -251,6 +266,7 @@ footer a {
     position: relative;
     margin-bottom: .5rem;
     font-size: 1rem;
+    z-index: 100;
 
     input {
       width: 6.25rem;
@@ -432,6 +448,18 @@ footer a {
 }
 
 #detail-view {
+  display: none;
+  &.active {
+    display: block;
+    opacity: 1;
+    transform: scale(1);
+    animation: pop 350ms ease-in-out;
+  }
+
+  @media screen and (min-width: 768px) {
+    margin-top: -3rem;
+    h2 { padding-right: 6.25rem; }
+  }
 }
 
 .project-snapshot {
@@ -667,4 +695,20 @@ footer a {
 .browserupgrade {
   text-align: center;
   margin: 1em 15px;
+}
+
+@keyframes pop {
+  0% {
+    display: none;
+    opacity: 0;
+  }
+  1% {
+    display: block;
+    opacity: 0;
+    transform: scale(0);
+  }
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
