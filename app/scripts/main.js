@@ -554,8 +554,6 @@ views.DetailView.prototype = {
           ({ planYear, plan: _.map(yearRange, (year) => ({ year, proposed: cip.plan['FY' + year] })) })
         ).sortBy('planYear').reverse().value();
 
-        console.log(data.cip_history, histData);
-
         let table = view.el.select('.project-historical-plans .data-table');
 
         view.el.selectAll('.project-historical-plans tbody')
