@@ -395,6 +395,10 @@ views.DetailView = function (sel) {
     $(e.target).parents('.project-description').toggleClass('collapsed');
   });
 
+  this.$el.on('change', '.project-cumulative-funding select[name=category]', function (e) {
+    if (view.updateCumFunding) { view.updateCumFunding($(e.target).val()); }
+  });
+
   this.$el.on('change', '#historical-plans-display', function (e) {
     if ($(e.currentTarget).children('input[name=display]:checked').val() === 'table') {
       view.$el.find('.project-historical-plans').removeClass('display-chart');
@@ -438,6 +442,23 @@ views.DetailView.prototype = {
         .substring(2), 10);
       let yearRange = _.range(data.first_year, maxYear + 1);
       let futureIdx = yearRange.length + CURRENT_YEAR - maxYear;
+
+      view.el.select('.project-cumulative-funding select[name=category] optgroup.funding_by_phase')
+        .selectAll('option')
+        .data(_.keys(data.cumulative_funding.funding_by_phase))
+        .enter().append('option')
+        .attr('value', (d) => `funding_by_phase.${d}`)
+        .text((d) => d);
+
+      view.el.select('.project-cumulative-funding select[name=category] optgroup.funding_by_source')
+        .selectAll('option')
+        .data(_.keys(data.cumulative_funding.funding_by_source))
+        .enter().append('option')
+        .attr('value', (d) => `funding_by_source.${d}`)
+        .text((d) => d);
+
+      view.$el.find('.project-cumulative-funding select[name=category]')
+        .chosen({ disable_search_threshold: 10 });
 
       let cumFundingSvg = view.el.select('.project-cumulative-funding .chart')
         .append('svg')
@@ -617,7 +638,8 @@ views.DetailView.prototype = {
       updateCumFunding();
       updateHistPlans();
 
-      // TODO: Filter cumulative funding by source/phase
+      view.updateCumFunding = updateCumFunding;
+
       // TODO: Add estimated cost to historical plans row headers
     });
   }
