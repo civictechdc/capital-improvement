@@ -243,6 +243,7 @@ for page in pages do
 
     projects[project_no][:cip_tables].push({
         :fy => page[:cip_fy],
+        :est_cost => page[:est_cost],
         :funding_by_phase => page[:funding_by_phase],
         :funding_by_source => page[:funding_by_source]
     })
@@ -290,7 +291,10 @@ projects.each do |project_no, project|
             sum
         end
 
-        project[:cip_history]["FY20#{cip[:fy]}"] = total
+        project[:cip_history]["FY20#{cip[:fy]}"] = {
+            :plan => total,
+            :est_cost => cip[:est_cost]
+        }
     end
 
     project[:cumulative_funding] = {}
@@ -343,7 +347,7 @@ projects.each do |project_no, project|
                     total_cum_funding[fy][col] += funds[col]
                 end
             else
-                total_cum_funding[fy] = funds
+                total_cum_funding[fy] = Marshal.load(Marshal.dump(funds))
             end
         end
     end

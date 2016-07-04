@@ -434,7 +434,7 @@ views.DetailView.prototype = {
 
       let maxYear = parseInt(_(data.cip_history)
         .values()
-        .map((v) => _.toPairs(v))
+        .map((v) => _.toPairs(v.plan))
         .flatten()
         .filter(1)
         .map(0)
@@ -550,9 +550,11 @@ views.DetailView.prototype = {
       }
 
       function updateHistPlans() {
-        let histData = _(data.cip_history).map((plan, planYear) =>
-          ({ planYear, plan: _.map(yearRange, (year) => ({ year, proposed: plan['FY' + year] })) })
+        let histData = _(data.cip_history).map((cip, planYear) =>
+          ({ planYear, plan: _.map(yearRange, (year) => ({ year, proposed: cip.plan['FY' + year] })) })
         ).sortBy('planYear').reverse().value();
+
+        console.log(data.cip_history, histData);
 
         let table = view.el.select('.project-historical-plans .data-table');
 
