@@ -96,6 +96,48 @@ input[type="checkbox"] {
   }
 }
 
+.toggle {
+  line-height: 2em;
+  cursor: pointer;
+  font-size: .8125rem;
+  margin-top: .25rem;
+
+  input {
+    display: none;
+
+    & + label {
+      white-space: nowrap;
+      display: block;
+      float: left;
+      padding: 0 1em;
+      background: $lt-gray;
+    }
+
+    &:checked + label {
+      background: $blue;
+      color: $white;
+    }
+    &:first-child + label {
+      border-top-left-radius: .5rem;
+      border-bottom-left-radius: .5rem;
+      padding-left: 1.175em;
+    }
+  }
+
+  label:last-child {
+    border-top-right-radius: .5rem;
+    border-bottom-right-radius: .5rem;
+    padding-right: 1.175em;
+    margin-right: .5rem;
+  }
+
+  .fa {
+    font-size: 1rem;
+    position: relative;
+    top: .175rem;
+  }
+}
+
 .clean-button {
   background: none;
   border: 0;
@@ -649,7 +691,7 @@ footer a {
 }
 
 .project-historical-plans {
-  .table { margin-top: 2em; }
+  .table { margin-top: 4em; }
   table {
     width: 0;
     max-width: none;
@@ -661,9 +703,8 @@ footer a {
     &.pinned { background: $bg; z-index: 100; }
   }
 
-  tbody { line-height: 100px; }
-
   .chart {
+    display: none;
     width: 0;
     height: 0;
     position: relative;
@@ -689,6 +730,11 @@ footer a {
       fill: $bodytext;
       text-transform: lowercase;
     }
+  }
+
+  &.display-chart {
+    tbody { line-height: 100px; }
+    .chart { display: block; }
   }
 }
 

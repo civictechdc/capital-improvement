@@ -383,6 +383,7 @@ views.IndexView.prototype = {
 };
 
 views.DetailView = function (sel) {
+  let view = this;
   this.el = d3.select(sel);
   this.$el = $(sel);
   this.template = _.template($('#detail-view-template').html(), {
@@ -392,6 +393,14 @@ views.DetailView = function (sel) {
 
   this.$el.on('click', '.project-description .toggle-collapsed', function (e) {
     $(e.target).parents('.project-description').toggleClass('collapsed');
+  });
+
+  this.$el.on('change', '#historical-plans-display', function (e) {
+    if ($(e.currentTarget).children('input[name=display]:checked').val() === 'table') {
+      view.$el.find('.project-historical-plans').removeClass('display-chart');
+    } else {
+      view.$el.find('.project-historical-plans').addClass('display-chart');
+    }
   });
 };
 
@@ -526,7 +535,7 @@ views.DetailView.prototype = {
 
         let table = view.el.select('.project-historical-plans .data-table');
 
-        table.select('tbody')
+        view.el.selectAll('.project-historical-plans tbody')
           .selectAll('tr')
           .data(histData)
           .enter().append('tr')
@@ -609,7 +618,6 @@ views.DetailView.prototype = {
       updateHistPlans();
 
       // TODO: Filter cumulative funding by source/phase
-      // TODO: Toggle historical plans chart into table
       // TODO: Add estimated cost to historical plans row headers
     });
   }

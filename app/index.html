@@ -217,7 +217,9 @@
         <div class="scroll-container">
 
           <div class="project-cumulative-funding">
-            <h3 class="pinned">Cumulative Funding</h3>
+            <div class="header pinned">
+              <h3>Cumulative Funding</h3>
+            </div>
             <div class="chart" role="presentation"></div>
             <div class="table">
               <table class="pinned" aria-hidden="true">
@@ -265,8 +267,22 @@
             </div>
           </div>
 
-          <div class="project-historical-plans">
-            <h3 class="pinned">Historical Plans</h3>
+          <div class="project-historical-plans display-chart">
+            <div class="header pinned">
+              <h3>Historical Plans</h3>
+              <form class="toggle" id="historical-plans-display">
+                <input type="radio" name="display" id="display-chart" value="chart" checked="checked" />
+                <label for="display-chart">
+                  <i class="fa fa-bar-chart" aria-hidden="true"></i>
+                  <span class="visually-hidden">Chart</span>
+                </label>
+                <input type="radio" name="display" id="display-table" value="table" />
+                <label for="display-table">
+                  <i class="fa fa-table" aria-hidden="true"></i>
+                  <span class="visually-hidden">Table</span>
+                </label>
+              </form>
+            </div>
             <div class="table">
               <table class="pinned" aria-hidden="true">
                 <thead>
