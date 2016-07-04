@@ -451,6 +451,19 @@ footer a {
     }
   }
 
+  th:after {
+    font-family: 'FontAwesome';
+    margin-left: .25em;
+  }
+
+  th.sort-asc:after {
+    content: $fa-var-sort-asc;
+  }
+
+  th.sort-desc:after {
+    content: $fa-var-sort-desc;
+  }
+
   td.last-year {
     color: $green;
     &.inactive { color: $red; }

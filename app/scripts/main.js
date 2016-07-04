@@ -203,6 +203,29 @@ views.IndexView = function (sel) {
     $(e.target).siblings('.search-bar input').val('').keyup();
   });
 
+  this.$el.find('.results thead th').click(function (e) {
+    let target = $(e.target);
+    let name = target.attr('name');
+    let currentDir = target.hasClass('sort-asc') ? 'asc' : target.hasClass('sort-desc') ? 'desc' : 'none';
+
+    target.parent().children()
+      .removeClass('sort-asc')
+      .removeClass('sort-desc');
+
+    switch (currentDir) {
+    case 'asc':
+      target.addClass('sort-desc');
+      app.setState({ indexOptions: { sort: name + '-desc' } }, { resetPage: true });
+      break;
+    case 'desc':
+      app.setState({ indexOptions: { sort: false } }, { resetPage: true });
+      break;
+    default:
+      target.addClass('sort-asc');
+      app.setState({ indexOptions: { sort: name + '-asc' } }, { resetPage: true });
+    }
+  });
+
   // TODO: Loading view
 
   d3.json(SUMMARY_PATH, function (error, data) {
@@ -313,9 +336,11 @@ views.IndexView.prototype = {
       (props.agency ? d.agency === props.agency : true)
     );
 
-    if (props.sort) { data = _.sortBy(data, props.sort); }
-
-    // TODO: Sort controls
+    if (props.sort && !props.q) {
+      let [col, dir] = props.sort.split('-');
+      data = _.sortBy(data, col);
+      if (dir === 'desc') { data.reverse(); }
+    }
 
     let page = parseInt(props.p, 10);
     let lastPage = Math.ceil(data.length / RESULTS_PER_PAGE) - 1;
