@@ -96,7 +96,6 @@ input[type="checkbox"] {
 .clean-button {
   background: none;
   border: 0;
-  outline: 0;
   cursor: pointer;
 }
 
@@ -297,6 +296,7 @@ footer a {
       top: .325rem;
       padding: 0;
       @extend .clean-button;
+      outline: 0;
       width: .825rem;
       height: 1.5rem;
       overflow: hidden;
@@ -540,32 +540,29 @@ footer a {
 
   button.toggle-collapsed {
     position: absolute;
-    bottom: 0; right: 0;
-    text-indent: 1em;
+    bottom: .325rem; right: .325rem;
     z-index: 100;
     @extend .clean-button;
-    width: 0; height: 0;
+    width: 1.65rem; height: 1.825rem;
+    padding: 0;
+    overflow: hidden;
     color: $link;
-    font-size: 2rem;
+    transform: rotate(45deg);
+    transition: transform 300ms;
 
     &:before {
-      display: block;
       content: $fa-var-plus;
       font-family: 'FontAwesome';
-      position: absolute;
-      width: 1rem; height: 1rem;
-      bottom: 1rem; right: 3.25rem;
-      transform: rotate(45deg);
-      transform-origin: 280% 65%;
-      transition: transform 300ms;
+      display: inline-block;
+      font-size: 2rem;
+      position: relative;
+      top: .325rem;
     }
-
-    &:focus:before { color: $red; }
   }
 
   &.collapsed {
     > div.card { max-height: 206px; }
-    button.toggle-collapsed:before {
+    button.toggle-collapsed {
       transform: rotate(0);
     }
   }
