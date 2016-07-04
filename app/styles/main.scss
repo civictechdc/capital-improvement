@@ -645,6 +645,7 @@ footer a {
 
 .scroll-container {
   overflow-x: scroll;
+  overflow-y: hidden;
   > * { padding: 15px 0; }
 
   .pinned { position: absolute; }
@@ -704,7 +705,20 @@ footer a {
       width: 100px;
       &:first-child { width: 120px; }
     }
+    tbody th {
+      position: relative;
+      padding-bottom: 1.5em;
+    }
     &.pinned { background: $bg; z-index: 100; }
+  }
+
+  .cost-label {
+    display: block;
+    position: absolute;
+    left: 0;
+    top: 2em;
+    font-weight: 400;
+    line-height: 0;
   }
 
   .chart {
@@ -737,7 +751,11 @@ footer a {
   }
 
   &.display-chart {
-    tbody { line-height: 100px; }
+    tbody {
+      line-height: 100px;
+      th { padding-bottom: 0; }
+    }
+    .cost-label { top: 65px; }
     .chart { display: block; }
   }
 }

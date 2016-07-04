@@ -551,7 +551,7 @@ views.DetailView.prototype = {
 
       function updateHistPlans() {
         let histData = _(data.cip_history).map((cip, planYear) =>
-          ({ planYear, plan: _.map(yearRange, (year) => ({ year, proposed: cip.plan['FY' + year] })) })
+          ({ planYear, est_cost: cip.est_cost, plan: _.map(yearRange, (year) => ({ year, proposed: cip.plan['FY' + year] })) })
         ).sortBy('planYear').reverse().value();
 
         let table = view.el.select('.project-historical-plans .data-table');
@@ -561,7 +561,10 @@ views.DetailView.prototype = {
           .data(histData)
           .enter().append('tr')
           .append('th')
-          .text((d) => d.planYear + ' Plan');
+          .text((d) => d.planYear + ' Plan')
+          .append('span')
+          .attr('class', 'cost-label')
+          .text((d) => `Est. cost: ${SHORT_DOLLAR_FORMAT(d.est_cost)}`);
 
         table.select('thead tr')
           .selectAll('th.year')
@@ -639,8 +642,6 @@ views.DetailView.prototype = {
       updateHistPlans();
 
       view.updateCumFunding = updateCumFunding;
-
-      // TODO: Add estimated cost to historical plans row headers
     });
   }
 };
