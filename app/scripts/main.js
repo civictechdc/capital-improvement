@@ -395,6 +395,8 @@ views.DetailView = function (sel) {
   });
 };
 
+// TODO: Back button
+
 views.DetailView.prototype = {
   show: function () {
     this.$el.addClass('active');
@@ -612,3 +614,7 @@ views.DetailView.prototype = {
     });
   }
 };
+
+// TODO: Google Analytics
+// TODO: Footer
+// TODO: README, license, civic.json, and GitHub description
