@@ -370,171 +370,194 @@ views.DetailView.prototype = {
 
       view.el.html(view.template(data));
 
-      let totalFunding = data.cumulative_funding.total_funding;
       let maxYear = parseInt(_(data.cip_history)
         .values()
         .map((v) => _.toPairs(v))
         .flatten()
         .filter(1)
-        .maxBy(0)[0]
+        .map(0)
+        .max()
         .substring(2), 10);
       let yearRange = _.range(data.first_year, maxYear + 1);
       let futureIdx = yearRange.length + CURRENT_YEAR - maxYear;
 
-      let cumFundingTable = view.el.select('.project-cumulative-funding .data-table');
-
-      cumFundingTable.select('thead tr')
-        .selectAll('th.year')
-        .data(yearRange)
-        .enter().append('th')
-        .attr('class', 'year')
-        .text((d) => 'FY' + d);
-
-      cumFundingTable.select('tr.proposed')
-        .selectAll('td')
-        .data(_.map(yearRange, (year) => _.get(totalFunding, ['FY' + year, 'proposed'])))
-        .enter().append('td')
-        .html((d) => d ? DOLLAR_FORMAT(d * 1000) : '&ndash;');
-
-      cumFundingTable.select('tr.allotted')
-        .selectAll('td')
-        .data(_.map(yearRange, (year) => _.get(totalFunding, ['FY' + year, 'allotted'])))
-        .enter().append('td')
-        .html((d) => d ? DOLLAR_FORMAT(d * 1000) : '&ndash;');
-
-      cumFundingTable.select('tr.balance')
-        .selectAll('td')
-        .data(_.map(yearRange, (year) => _.get(totalFunding, ['FY' + year, 'allotted']) - _.get(totalFunding, ['FY' + year, 'spent'])))
-        .enter().append('td')
-        .html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d * 1000) : '&ndash;');
-
-      cumFundingTable.select('tr.spent')
-        .selectAll('td')
-        .data(_.map(yearRange, (year) => _.get(totalFunding, ['FY' + year, 'spent'])))
-        .enter().append('td')
-        .html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d * 1000) : '&ndash;');
-
-      let cumFundingData = _(totalFunding)
-        .map((v, k) => _.assign({ year: k }, v))
-        .forEach((d) => {
-          d.segments = [
-            { name: 'spent', y0: 0, y1: d.spent },
-            { name: 'balance', y0: d.spent, y1: d.allotted },
-            { name: 'proposed', y0: d.allotted, y1: d.allotted + d.proposed }
-          ];
-          d.total = d.segments[d.segments.length - 1].y1;
-        });
-
-      let cumFundingX = d3.scale.ordinal()
-        .domain(_.map(yearRange, (d) => 'FY' + d))
-        .rangeRoundPoints([CHART_LEFT_MARGIN, CHART_LEFT_MARGIN + (yearRange.length - 1) * YEAR_WIDTH]);
-
-      let cumFundingY = d3.scale.linear()
-        .domain([0, d3.max(cumFundingData, (d) => d.total)])
-        .range([CUM_FUNDING_HEIGHT, 0]);
-
-      view.el.select('.project-cumulative-funding .chart')
+      let cumFundingSvg = view.el.select('.project-cumulative-funding .chart')
         .append('svg')
         .attr('width', YEAR_WIDTH * yearRange.length + CHART_LEFT_MARGIN)
-        .attr('height', CUM_FUNDING_HEIGHT)
-        .selectAll('g.bar')
-        .data(cumFundingData)
-        .enter().append('g')
-        .attr('class', 'bar')
-        .attr('transform', (d) => `translate(${cumFundingX(d.year)},0)`)
-        .selectAll('rect')
-        .data((d) => d.segments)
-        .enter().append('rect')
-        .attr('class', (d) => d.name)
-        .attr('x', 0)
-        .attr('y', (d) => cumFundingY(d.y1))
-        .attr('width', CUM_FUNDING_BAR_WIDTH)
-        .attr('height', (d) => cumFundingY(d.y0) - cumFundingY(d.y1));
+        .attr('height', CUM_FUNDING_HEIGHT);
 
-      let histTable = view.el.select('.project-historical-plans .data-table');
-      let histData = _(data.cip_history).map((plan, planYear) =>
-        ({ planYear, plan: _.map(yearRange, (year) => ({ year, proposed: plan['FY' + year] })) })
-      ).sortBy('planYear').reverse().value();
+      function updateCumFunding(category = 'total_funding') {
+        let catData = _.get(data.cumulative_funding, category);
 
-      view.el.selectAll('.project-historical-plans tbody')
-        .selectAll('tr')
-        .data(histData)
-        .enter().append('tr')
-        .append('th')
-        .text((d) => d.planYear + ' Plan');
+        let table = view.el.select('.project-cumulative-funding .data-table');
 
-      histTable.select('thead tr')
-        .selectAll('th.year')
-        .data(yearRange)
-        .enter().append('th')
-        .attr('class', 'year')
-        .text((d) => 'FY' + d);
+        table.select('thead tr')
+          .selectAll('th.year')
+          .data(yearRange)
+          .enter().append('th')
+          .attr('class', 'year')
+          .text((d) => 'FY' + d);
 
-      histTable.selectAll('tbody tr')
-        .selectAll('td')
-        .data((d) => d.plan)
-        .enter().append('td')
-        .text((d) => _.isUndefined(d.proposed) ? '' : DOLLAR_FORMAT(d.proposed * 1000));
+        let proposed = table.select('tr.proposed')
+          .selectAll('td')
+          .data(_.map(yearRange, (year) => _.get(catData, ['FY' + year, 'proposed'])));
 
-      let filteredHistData = _.map(histData, (d) => ({
-        planYear: d.planYear,
-        plan: _.filter(d.plan, (e) => !_.isUndefined(e.proposed))
-      }));
+        proposed.enter().append('td');
+        proposed.html((d) => d ? DOLLAR_FORMAT(d * 1000) : '&ndash;');
 
-      let histChartX = d3.scale.ordinal()
-        .domain(yearRange)
-        .rangeRoundPoints([0, YEAR_WIDTH * (yearRange.length - 1)]);
+        let allotted = table.select('tr.allotted')
+          .selectAll('td')
+          .data(_.map(yearRange, (year) => _.get(catData, ['FY' + year, 'allotted'])));
 
-      let rScale = d3.scale.sqrt()
-        .domain([0, _(filteredHistData).flatMap('plan').map('proposed').max()])
-        .range([0, YEAR_WIDTH / 2]);
+        allotted.enter().append('td');
+        allotted.html((d) => d ? DOLLAR_FORMAT(d * 1000) : '&ndash;');
 
-      let svg = view.el.select('.project-historical-plans .chart')
-        .append('svg')
-        .attr('width', YEAR_WIDTH * yearRange.length)
-        .attr('height', YEAR_WIDTH * histData.length);
+        let balance = table.select('tr.balance')
+          .selectAll('td')
+          .data(_.map(yearRange, (year) =>
+              _.get(catData, ['FY' + year, 'allotted']) -
+              _.get(catData, ['FY' + year, 'spent']))
+          );
 
-      svg.append('rect')
-        .attr('class', 'bg')
-        .attr('width', YEAR_WIDTH * yearRange.length)
-        .attr('height', YEAR_WIDTH * histData.length);
+        balance.enter().append('td');
+        balance.html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d * 1000) : '&ndash;');
 
-      let plans = svg.selectAll('g.plan')
-        .data(filteredHistData)
-        .enter().append('g')
-        .attr('class', 'plan')
-        .attr('transform', (d, i) => `translate(${HIST_CHART_INDENT},${(i + .5) * YEAR_WIDTH})`);
+        let spent = table.select('tr.spent')
+          .selectAll('td')
+          .data(_.map(yearRange, (year) => _.get(catData, ['FY' + year, 'spent'])));
 
-      plans.append('line')
-        .attr('x1', (d) => histChartX(d3.min(d.plan, (e) => e.year)))
-        .attr('y1', 0)
-        .attr('x2', (d) => histChartX(d3.max(d.plan, (e) => e.year)))
-        .attr('y2', 0);
+        spent.enter().append('td');
+        spent.html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d * 1000) : '&ndash;');
 
-      let years = plans.selectAll('g.year')
-        .data((d) => d.plan)
-        .enter().append('g')
-        .attr('class', 'year')
-        .attr('transform', (d) => `translate(${histChartX(d.year)},0)`);
+        let stackedData = _(catData)
+          .map((v, k) => _.assign({ year: k }, v))
+          .forEach((d) => {
+            d.segments = [
+              { name: 'spent', y0: 0, y1: d.spent },
+              { name: 'balance', y0: d.spent, y1: d.allotted },
+              { name: 'proposed', y0: d.allotted, y1: d.allotted + d.proposed }
+            ];
+            d.total = d.segments[d.segments.length - 1].y1;
+          });
 
-      years.append('line')
-        .attr('x1', 0)
-        .attr('y1', -6)
-        .attr('x2', 0)
-        .attr('y2', 6);
+        let x = d3.scale.ordinal()
+          .domain(_.map(yearRange, (d) => 'FY' + d))
+          .rangeRoundPoints([CHART_LEFT_MARGIN, CHART_LEFT_MARGIN + (yearRange.length - 1) * YEAR_WIDTH]);
 
-      years.append('circle')
-        .attr('cx', 0)
-        .attr('cy', 0)
-        .attr('r', (d) => rScale(d.proposed));
+        let y = d3.scale.linear()
+          .domain([0, d3.max(stackedData, (d) => d.total)])
+          .range([CUM_FUNDING_HEIGHT, 0]);
 
-      years.append('text')
-        .attr('text-anchor', 'middle')
-        .attr('y', (d) => {
-          let r = rScale(d.proposed);
-          return r > 22 ? 5 : Math.max(r + 16, 22);
-        })
-        .text((d) => d.proposed ? SHORT_DOLLAR_FORMAT(d.proposed * 1000) : '$0');
+        let bars = cumFundingSvg.selectAll('.bar')
+          .data(stackedData, (d) => d.year);
+
+        bars.enter().append('g')
+          .attr('class', 'bar')
+          .attr('transform', (d) => `translate(${x(d.year)},0)`);
+
+        bars.exit().remove();
+
+        let segments = bars.selectAll('rect')
+          .data((d) => d.segments);
+
+        segments.enter().append('rect')
+          .attr('class', (d) => d.name)
+          .attr('x', 0)
+          .attr('width', CUM_FUNDING_BAR_WIDTH);
+
+        segments.transition()
+          .attr('y', (d) => y(d.y1))
+          .attr('height', (d) => y(d.y0) - y(d.y1));
+      }
+
+      function updateHistPlans() {
+        let histData = _(data.cip_history).map((plan, planYear) =>
+          ({ planYear, plan: _.map(yearRange, (year) => ({ year, proposed: plan['FY' + year] })) })
+        ).sortBy('planYear').reverse().value();
+
+        let table = view.el.select('.project-historical-plans .data-table');
+
+        table.select('tbody')
+          .selectAll('tr')
+          .data(histData)
+          .enter().append('tr')
+          .append('th')
+          .text((d) => d.planYear + ' Plan');
+
+        table.select('thead tr')
+          .selectAll('th.year')
+          .data(yearRange)
+          .enter().append('th')
+          .attr('class', 'year')
+          .text((d) => 'FY' + d);
+
+        table.selectAll('tbody tr')
+          .selectAll('td')
+          .data((d) => d.plan)
+          .enter().append('td')
+          .text((d) => _.isUndefined(d.proposed) ? '' : DOLLAR_FORMAT(d.proposed * 1000));
+
+        let filteredHistData = _.map(histData, (d) => ({
+          planYear: d.planYear,
+          plan: _.filter(d.plan, (e) => !_.isUndefined(e.proposed))
+        }));
+
+        let x = d3.scale.ordinal()
+          .domain(yearRange)
+          .rangeRoundPoints([0, YEAR_WIDTH * (yearRange.length - 1)]);
+
+        let radius = d3.scale.sqrt()
+          .domain([0, _(filteredHistData).flatMap('plan').map('proposed').max()])
+          .range([0, YEAR_WIDTH / 2]);
+
+        let svg = view.el.select('.project-historical-plans .chart')
+          .append('svg')
+          .attr('width', YEAR_WIDTH * yearRange.length)
+          .attr('height', YEAR_WIDTH * histData.length);
+
+        svg.append('rect')
+          .attr('class', 'bg')
+          .attr('width', YEAR_WIDTH * yearRange.length)
+          .attr('height', YEAR_WIDTH * histData.length);
+
+        let plans = svg.selectAll('g.plan')
+          .data(filteredHistData)
+          .enter().append('g')
+          .attr('class', 'plan')
+          .attr('transform', (d, i) => `translate(${HIST_CHART_INDENT},${(i + .5) * YEAR_WIDTH})`);
+
+        plans.append('line')
+          .attr('x1', (d) => x(d3.min(d.plan, (e) => e.year)))
+          .attr('y1', 0)
+          .attr('x2', (d) => x(d3.max(d.plan, (e) => e.year)))
+          .attr('y2', 0);
+
+        let years = plans.selectAll('g.year')
+          .data((d) => d.plan)
+          .enter().append('g')
+          .attr('class', 'year')
+          .attr('transform', (d) => `translate(${x(d.year)},0)`);
+
+        years.append('line')
+          .attr('x1', 0)
+          .attr('y1', -6)
+          .attr('x2', 0)
+          .attr('y2', 6);
+
+        years.append('circle')
+          .attr('r', (d) => radius(d.proposed));
+
+        years.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('y', (d) => {
+            let r = radius(d.proposed);
+            return r > 22 ? 5 : Math.max(r + 16, 22);
+          })
+          .text((d) => d.proposed ? SHORT_DOLLAR_FORMAT(d.proposed * 1000) : '$0');
+      }
+
+      updateCumFunding();
+      updateHistPlans();
 
       // TODO: Filter cumulative funding by source/phase
       // TODO: Toggle historical plans chart into table
