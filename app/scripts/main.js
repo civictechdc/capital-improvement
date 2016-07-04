@@ -1,12 +1,8 @@
 /* global $ */
 
-// TODO: Breakpoints for indexView table
-
 const d3 = require('d3');
 const _ = require('lodash');
 const Fuse = require('fuse.js');
-
-// TODO: Import specific modules from D3 (requires v4) and Lodash
 
 const SUMMARY_PATH = 'data/summary.json';
 const DETAIL_PATH_FOR_ID = (id) => `data/projects/${id}.json`;
@@ -134,8 +130,6 @@ app = {
       app.state.title,
       '?' + app.serializeState(app.state)
     );
-
-    // TODO: Update title for detail view pages
   },
 
   serializeState: function (state) {
@@ -225,8 +219,6 @@ views.IndexView = function (sel) {
       app.setState({ indexOptions: { sort: name + '-asc' } }, { resetPage: true });
     }
   });
-
-  // TODO: Loading view
 
   d3.json(SUMMARY_PATH, function (error, data) {
     if (error) { return console.warn(error); }
@@ -452,7 +444,6 @@ views.DetailView.prototype = {
     let view = this;
 
     this.el.html('');
-    // TODO: Loading view
 
     if (!id) { return; }
 
@@ -674,6 +665,3 @@ views.DetailView.prototype = {
     });
   }
 };
-
-// TODO: Google Analytics
-// TODO: Footer
