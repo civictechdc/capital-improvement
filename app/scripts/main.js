@@ -365,7 +365,9 @@ views.IndexView.prototype = {
       .data(data)
       .enter().append('tr')
       .on('click', function (d) {
-        app.setState({ view: 'detail', detailOptions: { id: d.project_no } }, { resetAll: true });
+        if (d3.event.target.tagName !== 'A') {
+          app.setState({ view: 'detail', detailOptions: { id: d.project_no } }, { resetAll: true });
+        }
       });
 
     rows.append('td')
