@@ -1,6 +1,6 @@
 /* global $ */
 
-const d3 = require('d3');
+const d3 = require('./d3.bundle.js');
 const _ = require('lodash');
 const Fuse = require('fuse.js');
 
