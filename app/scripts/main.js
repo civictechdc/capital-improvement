@@ -1,6 +1,6 @@
 /* global $ */
 
-const d3 = require('d3');
+const d3 = require('./d3.bundle.js');
 const _ = require('lodash');
 const Fuse = require('fuse.js');
 
@@ -541,11 +541,11 @@ views.DetailView.prototype = {
             d.total = d.segments[d.segments.length - 1].y1;
           });
 
-        let x = d3.scale.ordinal()
+        let x = d3.scaleBand()
           .domain(_.map(yearRange, (d) => 'FY' + d))
-          .rangeRoundPoints([CHART_LEFT_MARGIN, CHART_LEFT_MARGIN + (yearRange.length - 1) * YEAR_WIDTH]);
+          .range([CHART_LEFT_MARGIN, CHART_LEFT_MARGIN + (yearRange.length - 1) * YEAR_WIDTH]);
 
-        let y = d3.scale.linear()
+        let y = d3.scaleLinear()
           .domain([0, d3.max(stackedData, (d) => d.total)])
           .range([CUM_FUNDING_HEIGHT, 0]);
 
@@ -606,11 +606,11 @@ views.DetailView.prototype = {
           plan: _.filter(d.plan, (e) => !_.isUndefined(e.proposed))
         }));
 
-        let x = d3.scale.ordinal()
+        let x = d3.scaleBand()
           .domain(yearRange)
-          .rangeRoundPoints([0, YEAR_WIDTH * (yearRange.length - 1)]);
+          .range([0, YEAR_WIDTH * (yearRange.length - 1)]);
 
-        let radius = d3.scale.sqrt()
+        let radius = d3.scaleSqrt()
           .domain([0, _(filteredHistData).flatMap('plan').map('proposed').max()])
           .range([0, YEAR_WIDTH / 2]);
 
