@@ -1,4 +1,4 @@
-/* global $ */
+/* global $, ga */
 
 const _ = require('lodash');
 const Fuse = require('fuse.js');
@@ -143,6 +143,11 @@ app = {
       app.state.title,
       '?' + app.serializeState(app.state)
     );
+
+    if (!replace && ga) {
+      ga('set', 'page', window.location.pathname + '?' + window.location.search);
+      ga('send', 'pageview');
+    }
   },
 
   serializeState: function (state) {
@@ -195,6 +200,9 @@ views.IndexView = function (sel) {
     let q = target.val();
     if (q !== '') {
       target.parent().addClass('text-entered');
+      if (ga) {
+        ga('send', 'event', 'Capital Improvement', 'search', q);
+      }
     } else {
       target.parent().removeClass('text-entered');
     }
