@@ -1,8 +1,21 @@
 /* global $ */
 
-const d3 = require('./d3.bundle.js');
 const _ = require('lodash');
 const Fuse = require('fuse.js');
+
+import {
+  scaleBand as d3_scaleBand,
+  scaleLinear as d3_scaleLinear,
+  scaleSqrt as d3_scaleSqrt
+} from 'd3-scale';
+import {
+  select as d3_select,
+  event as d3_event
+} from 'd3-selection';
+import 'd3-transition';
+import { json as d3_json } from 'd3-request';
+import { format as d3_format } from 'd3-format';
+import { max as d3_max, min as d3_min } from 'd3-array';
 
 const SUMMARY_PATH = 'data/summary.json';
 const DETAIL_PATH_FOR_ID = (id) => `data/projects/${id}.json`;
@@ -16,9 +29,9 @@ const CUM_FUNDING_HEIGHT = 120;
 const CUM_FUNDING_BAR_WIDTH = 45;
 const HIST_CHART_INDENT = 38;
 
-const DOLLAR_FORMAT = d3.format('$,');
-const SHORT_DOLLAR_FORMAT = d3.format('$.2s');
-const PERCENT_FORMAT = d3.format('%');
+const DOLLAR_FORMAT = d3_format('$,');
+const SHORT_DOLLAR_FORMAT = d3_format('$.2s');
+const PERCENT_FORMAT = d3_format('%');
 
 let defaultState = {
   title: TITLE,
@@ -166,7 +179,7 @@ app = {
 views.IndexView = function (sel) {
   let view = this;
   this.state = {};
-  this.el = d3.select(sel);
+  this.el = d3_select(sel);
   this.tbody = this.el.select('tbody');
 
   this.$el = $(sel);
@@ -220,7 +233,7 @@ views.IndexView = function (sel) {
     }
   });
 
-  d3.json(SUMMARY_PATH, function (error, data) {
+  d3_json(SUMMARY_PATH, function (error, data) {
     if (error) { return console.warn(error); }
 
     view.data = data;
@@ -365,7 +378,7 @@ views.IndexView.prototype = {
       .data(data)
       .enter().append('tr')
       .on('click', function (d) {
-        if (d3.event.target.tagName !== 'A') {
+        if (d3_event.target.tagName !== 'A') {
           app.setState({ view: 'detail', detailOptions: { id: d.project_no } }, { resetAll: true });
         }
       });
@@ -391,7 +404,7 @@ views.IndexView.prototype = {
     rows.append('td')
       .attr('class', 'percent')
       .each(function (d) {
-        let cell = d3.select(this);
+        let cell = d3_select(this);
         let percent = PERCENT_FORMAT(d.complete_percent);
 
         cell.append('span')
@@ -409,7 +422,7 @@ views.IndexView.prototype = {
 
 views.DetailView = function (sel) {
   let view = this;
-  this.el = d3.select(sel);
+  this.el = d3_select(sel);
   this.$el = $(sel);
   this.template = _.template($('#detail-view-template').html(), {
     variable: 'd',
@@ -449,7 +462,7 @@ views.DetailView.prototype = {
 
     if (!id) { return; }
 
-    d3.json(DETAIL_PATH_FOR_ID(id), function (error, data) {
+    d3_json(DETAIL_PATH_FOR_ID(id), function (error, data) {
       if (error) { return console.warn(error); }
 
       view.el.html(view.template(data));
@@ -503,15 +516,17 @@ views.DetailView.prototype = {
           .selectAll('td')
           .data(_.map(yearRange, (year) => _.get(catData, ['FY' + year, 'proposed'])));
 
-        proposed.enter().append('td');
-        proposed.html((d) => d ? DOLLAR_FORMAT(d * 1000) : '&ndash;');
+        proposed.enter().append('td')
+          .merge(proposed)
+          .html((d) => d ? DOLLAR_FORMAT(d * 1000) : '&ndash;');
 
         let allotted = table.select('tr.allotted')
           .selectAll('td')
           .data(_.map(yearRange, (year) => _.get(catData, ['FY' + year, 'allotted'])));
 
-        allotted.enter().append('td');
-        allotted.html((d) => d ? DOLLAR_FORMAT(d * 1000) : '&ndash;');
+        allotted.enter().append('td')
+          .merge(allotted)
+          .html((d) => d ? DOLLAR_FORMAT(d * 1000) : '&ndash;');
 
         let balance = table.select('tr.balance')
           .selectAll('td')
@@ -520,15 +535,17 @@ views.DetailView.prototype = {
               _.get(catData, ['FY' + year, 'spent']))
           );
 
-        balance.enter().append('td');
-        balance.html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d * 1000) : '&ndash;');
+        balance.enter().append('td')
+          .merge(balance)
+          .html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d * 1000) : '&ndash;');
 
         let spent = table.select('tr.spent')
           .selectAll('td')
           .data(_.map(yearRange, (year) => _.get(catData, ['FY' + year, 'spent'])));
 
-        spent.enter().append('td');
-        spent.html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d * 1000) : '&ndash;');
+        spent.enter().append('td')
+          .merge(spent)
+          .html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d * 1000) : '&ndash;');
 
         let stackedData = _(catData)
           .map((v, k) => _.assign({ year: k }, v))
@@ -541,22 +558,23 @@ views.DetailView.prototype = {
             d.total = d.segments[d.segments.length - 1].y1;
           });
 
-        let x = d3.scaleBand()
+        let x = d3_scaleBand()
           .domain(_.map(yearRange, (d) => 'FY' + d))
-          .range([CHART_LEFT_MARGIN, CHART_LEFT_MARGIN + (yearRange.length - 1) * YEAR_WIDTH]);
+          .range([CHART_LEFT_MARGIN, CHART_LEFT_MARGIN + (yearRange.length) * YEAR_WIDTH]);
 
-        let y = d3.scaleLinear()
-          .domain([0, d3.max(stackedData, (d) => d.total)])
+        let y = d3_scaleLinear()
+          .domain([0, d3_max(stackedData, (d) => d.total)])
           .range([CUM_FUNDING_HEIGHT, 0]);
 
         let bars = cumFundingSvg.selectAll('.bar')
           .data(stackedData, (d) => d.year);
 
-        bars.enter().append('g')
-          .attr('class', 'bar')
-          .attr('transform', (d) => `translate(${x(d.year)},0)`);
-
         bars.exit().remove();
+
+        bars = bars.enter().append('g')
+          .attr('class', 'bar')
+          .attr('transform', (d) => `translate(${x(d.year)},0)`)
+          .merge(bars);
 
         let segments = bars.selectAll('rect')
           .data((d) => d.segments);
@@ -564,9 +582,8 @@ views.DetailView.prototype = {
         segments.enter().append('rect')
           .attr('class', (d) => d.name)
           .attr('x', 0)
-          .attr('width', CUM_FUNDING_BAR_WIDTH);
-
-        segments.transition()
+          .attr('width', CUM_FUNDING_BAR_WIDTH)
+          .merge(segments).transition()
           .attr('y', (d) => y(d.y1))
           .attr('height', (d) => y(d.y0) - y(d.y1));
       }
@@ -606,11 +623,11 @@ views.DetailView.prototype = {
           plan: _.filter(d.plan, (e) => !_.isUndefined(e.proposed))
         }));
 
-        let x = d3.scaleBand()
+        let x = d3_scaleBand()
           .domain(yearRange)
-          .range([0, YEAR_WIDTH * (yearRange.length - 1)]);
+          .range([0, YEAR_WIDTH * (yearRange.length)]);
 
-        let radius = d3.scaleSqrt()
+        let radius = d3_scaleSqrt()
           .domain([0, _(filteredHistData).flatMap('plan').map('proposed').max()])
           .range([0, YEAR_WIDTH / 2]);
 
@@ -631,9 +648,9 @@ views.DetailView.prototype = {
           .attr('transform', (d, i) => `translate(${HIST_CHART_INDENT},${(i + .5) * YEAR_WIDTH})`);
 
         plans.append('line')
-          .attr('x1', (d) => x(d3.min(d.plan, (e) => e.year)))
+          .attr('x1', (d) => x(d3_min(d.plan, (e) => e.year)))
           .attr('y1', 0)
-          .attr('x2', (d) => x(d3.max(d.plan, (e) => e.year)))
+          .attr('x2', (d) => x(d3_max(d.plan, (e) => e.year)))
           .attr('y2', 0);
 
         let years = plans.selectAll('g.year')
