@@ -510,7 +510,7 @@ views.DetailView.prototype = {
           .data(yearRange)
           .enter().append('th')
           .attr('class', 'year')
-          .text((d) => 'FY' + d);
+          .text((d) => 'FY' + d + (d > CURRENT_YEAR ? '*' : ''));
 
         let proposed = table.select('tr.proposed')
           .selectAll('td')
@@ -537,7 +537,7 @@ views.DetailView.prototype = {
 
         balance.enter().append('td')
           .merge(balance)
-          .html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d * 1000) : '&ndash;');
+          .html((d, i) => d ? i >= futureIdx ? '&ndash;' : DOLLAR_FORMAT(d * 1000) : '&ndash;');
 
         let spent = table.select('tr.spent')
           .selectAll('td')
@@ -545,7 +545,7 @@ views.DetailView.prototype = {
 
         spent.enter().append('td')
           .merge(spent)
-          .html((d, i) => d ? i >= futureIdx ? '*' : DOLLAR_FORMAT(d * 1000) : '&ndash;');
+          .html((d, i) => d ? i >= futureIdx ? '&ndash;' : DOLLAR_FORMAT(d * 1000) : '&ndash;');
 
         let stackedData = _(catData)
           .map((v, k) => _.assign({ year: k }, v))
