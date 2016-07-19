@@ -178,6 +178,7 @@
                   <tr><th>Status:</th><td><%= d.status %></td></tr>
                   <tr><th>Useful Life:</th><td><%= d.useful_life %> years</td></tr>
                   <tr><th>Est. Full Funding Cost:</th><td><%= DOLLAR_FORMAT(d.est_cost) %></td></tr>
+                  <tr><th>Spent (as of last plan):</th><td><%= DOLLAR_FORMAT(d.spent) %></td></tr>
                 </tbody>
               </table>
             </div>
@@ -277,6 +278,11 @@
                 </tbody>
               </table>
             </div>
+            <div class="description">
+              <p><strong>Proposed</strong> refers to funds that OCFO projected would be added to the project budget in that year's capital improvement plan. These plans can be changed by DC Council action or for other reasons, which can explain why these funds sometimes do not appear in subsequent years' <strong>Allotted</strong> funding.</p>
+              <p><strong>Allotted</strong> refers to funds that were set aside for the project in previous years. Some of these have already been <strong>Spent</strong> on the project; the funds that have not yet been spent are shown as the <strong>Balance</strong>.</p>
+              <p class="small">* Future years funding is projected based on the most recent year's capital improvement plan, assuming that all funds are made available as planned.</p>
+            </div>
           </div>
 
           <div class="project-historical-plans display-chart">
@@ -294,6 +300,9 @@
                   <span class="visually-hidden">Table</span>
                 </label>
               </form>
+            </div>
+            <div class="description">
+              <p>Each capital improvement plan proposes funding for the current fiscal year and five years into the future. In order to understand how these plans have changed over time, this chart stacks the most recent plan on top of those from past years, showing what each plan proposed to spend on the project in a given year. The oldest plan is on the bottom.</p>
             </div>
             <div class="table">
               <table class="pinned" aria-hidden="true">

@@ -473,6 +473,11 @@ views.DetailView.prototype = {
     d3_json(DETAIL_PATH_FOR_ID(id), function (error, data) {
       if (error) { return console.warn(error); }
 
+      data.spent = _(data.cumulative_funding.total_funding)
+        .toPairs()
+        .max((k, v) => k)[1]
+        .spent * 1000;
+
       view.el.html(view.template(data));
 
       let maxYear = parseInt(_(data.cip_history)
