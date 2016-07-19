@@ -252,9 +252,11 @@ header, footer {
 
 header a { color: $yellow; }
 
-footer a {
-  color: $white;
-  text-decoration: underline;
+footer {
+  font-size: .8125rem;
+  text-align: center;
+  padding: 1em 0 1.25em;
+  a { color: $white; }
 }
 
 .logo {
