@@ -626,7 +626,7 @@ views.DetailView.prototype = {
           .text((d) => d.planYear + ' Plan')
           .append('span')
           .attr('class', 'cost-label')
-          .text((d) => `Est. cost: ${SHORT_DOLLAR_FORMAT(d.est_cost)}`);
+          .html((d) => 'Est. cost: ' + (!_.isNull(d.est_cost) ? SHORT_DOLLAR_FORMAT(d.est_cost) : '&mdash;'));
 
         table.select('thead tr')
           .selectAll('th.year')
