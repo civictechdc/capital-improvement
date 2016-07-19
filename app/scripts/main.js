@@ -678,6 +678,7 @@ views.DetailView.prototype = {
 
         years.append('text')
           .attr('text-anchor', 'middle')
+          .attr('x', 0)
           .attr('y', (d) => {
             let r = radius(d.proposed);
             return r > 22 ? 5 : Math.max(r + 16, 22);
