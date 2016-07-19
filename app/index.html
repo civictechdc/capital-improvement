@@ -172,8 +172,8 @@
                 <tbody>
                   <tr><th>Agency:</th><td><a href="?agency=<%= encodeURIComponent(d.agency) %>"><%= d.agency %></a></td></tr>
                   <tr><th>Implementing Agency:</th><td><%= d.implementing_agency %></td></tr>
-                  <tr><th>Ward:</th><td>WARD <%= d.ward %></td></tr>
                   <tr><th>Location:</th><td><%= d.location %></td></tr>
+                  <% if (d.ward) { %><tr><th>Ward:</th><td>WARD <%= d.ward %></td></tr><% } %>
                   <tr><th>Facility:</th><td><%= d.facility %></td></tr>
                   <tr><th>Status:</th><td><%= d.status %></td></tr>
                   <tr><th>Useful Life:</th><td><%= d.useful_life %> years</td></tr>
