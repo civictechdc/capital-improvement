@@ -606,6 +606,16 @@ views.DetailView.prototype = {
           ({ planYear, est_cost: cip.est_cost, plan: _.map(yearRange, (year) => ({ year, proposed: cip.plan['FY' + year] })) })
         ).sortBy('planYear').reverse().value();
 
+        let totalCumFunding = data.cumulative_funding.total_funding;
+        let pastAllotted = _.map(totalCumFunding, function (funding, year) {
+          let intYear = parseInt(year.substring(2), 10);
+          let nextYear = _.get(totalCumFunding, [
+            'FY' + (intYear + 1),
+            'allotted'
+          ]);
+          return { year: intYear, funding: _.max([nextYear - funding.allotted, 0]) };
+        });
+
         let table = view.el.select('.project-historical-plans .data-table');
 
         view.el.selectAll('.project-historical-plans tbody')
@@ -679,7 +689,9 @@ views.DetailView.prototype = {
           .attr('y2', 6);
 
         years.append('circle')
-          .attr('r', (d) => radius(d.proposed));
+          .attr('r', (d) => radius(d.proposed))
+          .attr('cx', 0)
+          .attr('cy', 0);
 
         years.append('text')
           .attr('text-anchor', 'middle')
@@ -689,6 +701,27 @@ views.DetailView.prototype = {
             return r > 22 ? 5 : Math.max(r + 16, 22);
           })
           .text((d) => d.proposed ? SHORT_DOLLAR_FORMAT(d.proposed * 1000) : '$0');
+
+        let pastYears = plans.selectAll('.past-year')
+          .data((d) => _.filter(pastAllotted, (e) => e.year < parseInt(d.planYear.substring(2), 10)))
+          .enter()
+          .append('g')
+          .attr('class', 'past-year')
+          .attr('transform', (d) => `translate(${x(d.year)},0)`);
+
+        pastYears.append('circle')
+          .attr('r', (d) => radius(d.funding))
+          .attr('cx', 0)
+          .attr('cy', 0);
+
+        pastYears.append('text')
+          .attr('text-anchor', 'middle')
+          .attr('x', 0)
+          .attr('y', (d) => {
+            let r = radius(d.funding);
+            return r > 22 ? 5 : Math.max(r + 16, 22);
+          })
+          .text((d) => d.funding > 0 ? SHORT_DOLLAR_FORMAT(d.funding * 1000) + '*' : '');
       }
 
       updateCumFunding();
