@@ -31,7 +31,7 @@ const HIST_CHART_INDENT = 38;
 
 const DOLLAR_FORMAT = d3_format('$,');
 const SHORT_DOLLAR_FORMAT = d3_format('$.2s');
-const PERCENT_FORMAT = d3_format('%');
+const PERCENT_FORMAT = d3_format('.0%');
 
 let defaultState = {
   title: TITLE,
