@@ -368,7 +368,7 @@ views.IndexView.prototype = {
         .attr('aria-disabled', href === '');
     });
 
-    this.el.selectAll('.current-page').text(page + 1);
+    this.el.selectAll('.current-page').text((page + 1) + ' of ' + (lastPage + 1));
 
     data = data.slice(RESULTS_PER_PAGE * page, RESULTS_PER_PAGE * (page + 1));
 
