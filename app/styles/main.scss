@@ -487,6 +487,18 @@ footer a {
     line-height: 1em;
     padding: 10px 15px;
   }
+
+  @media screen and (max-width: 800px) {
+    th.percent, td.percent { display: none; }
+  }
+
+  @media screen and (max-width: 540px) {
+    th.last-year, td.last-year { display: none; }
+  }
+
+  @media screen and (max-width: 450px) {
+    th.agency, td.agency { display: none; }
+  }
 }
 
 .page-controls {
