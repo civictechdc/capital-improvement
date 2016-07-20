@@ -308,8 +308,8 @@ footer {
     margin-bottom: .5rem;
   }
 
-  .filters { opacity: 0; transition: opacity 350ms; }
-  &.active .filters { opacity: 1; }
+  .filters { opacity: 0; transition: opacity 350ms; display: none; }
+  &.active .filters { opacity: 1; display: block; }
 
   .results { display: none; }
   &.active .results {

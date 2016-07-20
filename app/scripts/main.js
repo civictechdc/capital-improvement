@@ -596,6 +596,8 @@ views.DetailView.prototype = {
           .attr('class', (d) => d.name)
           .attr('x', 0)
           .attr('width', CUM_FUNDING_BAR_WIDTH)
+          .attr('y', CUM_FUNDING_HEIGHT)
+          .attr('height', 0)
           .merge(segments).transition()
           .attr('y', (d) => y(d.y1))
           .attr('height', (d) => y(d.y0) - y(d.y1));
